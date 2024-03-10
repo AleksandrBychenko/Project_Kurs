@@ -2,8 +2,8 @@ from datetime import datetime
 
 import pytest
 
-from bookkeeper.bookkeeper.repository.memory_repository import MemoryRepository
-from bookkeeper.bookkeeper.models.expense import Expense
+from Project_bookkeeper.bookkeeper.repository.memory_repository import MemoryRepository
+from Project_bookkeeper.bookkeeper.models.expense import Expense
 
 
 @pytest.fixture

@@ -1,4 +1,4 @@
-from bookkeeper.repository.abstract_repository import AbstractRepository
+from Project_bookkeeper.repository.abstract_repository import AbstractRepository
 
 import pytest
 
