@@ -2,9 +2,11 @@
 Простой тестовый скрипт для терминала
 """
 
-from models.category import Category
-from models.expense import Expense
-from repository.memory_repository import MemoryRepository
+
+
+from Project_bookkeeper.bookkeeper.models.category import Category
+from Project_bookkeeper.bookkeeper.models.expense import Expense
+from Project_bookkeeper.bookkeeper.repository.memory_repository import MemoryRepository
 from utils import read_tree
 
 cat_repo = MemoryRepository[Category]()
