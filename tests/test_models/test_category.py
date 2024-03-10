@@ -4,9 +4,8 @@
 from inspect import isgenerator
 
 import pytest
-
-from models.category import Category
-from  bookkeeper.repository.memory_repository import MemoryRepository
+from bookkeeper.bookkeeper.models.category import Category
+from bookkeeper.bookkeeper.repository.memory_repository import MemoryRepository
 
 
 @pytest.fixture
