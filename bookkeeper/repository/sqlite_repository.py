@@ -18,6 +18,9 @@ class SQLiteManager:
     def close_connection(self):
         self.connection.close()
 
+    def commit(self):
+        self.connection.commit()
+
 """
 # Создайте экземпляр класса SQLiteManager
 sqlite_manager = SQLiteManager('database.db')

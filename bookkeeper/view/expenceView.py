@@ -14,7 +14,7 @@ class ExpenseApp(QWidget):
         self.daily_table.set_table_header(['Сумма', 'Бюджет', 'Разница'])
         self.daily_table.set_row_labels(['День', 'Месяц', 'Год'])
 
-        self.sqlite_manager = SQLiteManager('expenses.db')
+        self.sqlite_manager = SQLiteManager('expence.db')
         self.init_ui()
 
 
@@ -25,16 +25,25 @@ class ExpenseApp(QWidget):
         self.setWindowTitle('Expense Tracker')
         layout = QVBoxLayout()
 
+        self.label = QLabel("Последние расходы")
+        layout.addWidget(self.label)
+
         # Создание таблицы для отображения данных
         self.table = QTableWidget()
+
         self.table.verticalHeader().setVisible(False)  # Скрыть названия строк
         self.table.verticalHeader().setMinimumWidth(0)  # Установить минимальную ширину названий строк
         self.table.verticalHeader().setDefaultSectionSize(25)  # Установить фиксированную высоту строк
         layout.addWidget(self.table)
 
 
-
+        self.label = QLabel("Бюджет")
+        layout.addWidget(self.label)
         layout.addWidget(self.daily_table)
+
+
+
+
 
 
         # Создание кнопки для добавления данных
@@ -52,17 +61,37 @@ class ExpenseApp(QWidget):
         add_button.clicked.connect(lambda: self.add_expense_big(category_combo, amount_edit))
         layout.addWidget(add_button)
 
+        # Создаем горизонтальный layout для кнопок
+        button_layout = QHBoxLayout()
+        # Создаем кнопки
+        button1 = QPushButton("Убрать последнию расходы")
+        button2 = QPushButton("Delet base")
+
+        # Добавляем кнопки в горизонтальный layout
+        button_layout.addWidget(button1)
+        button_layout.addWidget(button2)
+        layout.addLayout(button_layout)
+
+        #button2.clicked.connect(self.Delet_Base)
+
         self.setLayout(layout)
+
+
+
+
+
 
         self.load_data()
 
     def load_data(self):
         # Проверяем наличие таблицы 'Expence' и создаем ее, если она отсутствует
-        self.sqlite_manager.execute_query("CREATE TABLE IF NOT EXISTS Expence (id INTEGER PRIMARY KEY, date TEXT, amount REAL, category TEXT, comment TEXT)")
+        self.sqlite_manager.execute_query("CREATE TABLE IF NOT EXISTS expence (id INTEGER PRIMARY KEY, date TEXT, amount REAL, category TEXT, comment TEXT)")
 
         # Получаем данные из таблицы и отображаем их в таблице
         # Получаем данные из таблицы без столбца 'id'
-        data = self.sqlite_manager.fetch_data("SELECT date, amount, category, comment FROM Expence")
+        data = self.sqlite_manager.fetch_data("SELECT date, amount, category, comment FROM expence")
+        #data = self.sqlite_manager.fetch_data("SELECT * FROM Expence")
+        #data_id = self.sqlite_manager.fetch_data("SELECT id FROM Expence")
         self.table.setRowCount(len(data))
         self.table.setColumnCount(len(data[0]) if data else 0)
 
@@ -91,14 +120,19 @@ class ExpenseApp(QWidget):
         col = item.column()
         new_value = item.text()
         print(new_value)
+        print(row)
 
         # Получаем значение id из первой ячейки в строке
-        id_value = self.table.item(row, col).text()
+        #id_value = self.table.item(row, 0).text()
+        id_value = row
 
         column_name = self.table.horizontalHeaderItem(col).text()
         print(column_name)
         query = f"UPDATE Expence SET {column_name} = '{new_value}' WHERE id = {id_value}"
+        print(query)
+        #query = f"UPDATE Expence SET amount = 450 WHERE id = 3"
         self.sqlite_manager.execute_query(query)
+        #self.sqlite_manager.commit()
         print('Donre to aql')
 
     def add_expense_big (self, category, amount):
@@ -106,16 +140,24 @@ class ExpenseApp(QWidget):
         # Здесь можно добавить диалоговое окно для ввода данных
 
 
-        self.sqlite_manager.execute_query(f"INSERT INTO Expence (date, amount, category, comment) VALUES ('2024-03-10', '{amount.text()}', '{category.currentText()}', 'Lunch')")
+        self.sqlite_manager.execute_query(f"INSERT INTO expence (date, amount, category, comment) VALUES ('2024-03-10', '{amount.text()}', '{category.currentText()}', 'Lunch')")
 
         # Обновление отображаемых данных в таблице
         self.load_data()
+
+    def Delet_Base(self):
+        # Очистка таблицы
+        self.sqlite_manager.execute_query("DELETE FROM expence")
+        # Обновление отображаемых данных в таблице
+        self.load_data()
+
+
     def add_expense(self):
         # Добавление новой записи в таблицу
         # Здесь можно добавить диалоговое окно для ввода данных
 
 
-        self.sqlite_manager.execute_query(f"INSERT INTO Expence (date, amount, category, comment) VALUES ('2024-03-10', '555', 'Категоия моя ', 'Lunch')")
+        self.sqlite_manager.execute_query(f"INSERT INTO expence (date, amount, category, comment) VALUES ('2024-03-10', '555', 'Категоия моя ', 'Lunch')")
 
         # Обновление отображаемых данных в таблице
         self.load_data()
@@ -143,4 +185,5 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     expense_app = ExpenseApp()
     expense_app.show()
+
     sys.exit(app.exec())
