@@ -42,19 +42,15 @@ class ExpenseApp(QWidget):
         category_combo = QComboBox()
         category_combo.addItems(['Категория 1', 'Категория 2', 'Категория 3'])  # Замените на свои категории
         amount_edit = QLineEdit()
-        add_button = QPushButton('Add')
-        add_button.clicked.connect(self.add_expense_row)
+        #add_button = QPushButton('Add')
+        #add_button.clicked.connect(self.add_expense_row)
 
         layout.addWidget(category_combo)
         layout.addWidget(amount_edit)
 
-
-
-
         add_button = QPushButton('Add Expense')
-        add_button.clicked.connect(self.add_expense)
+        add_button.clicked.connect(lambda: self.add_expense_big(category_combo, amount_edit))
         layout.addWidget(add_button)
-
 
         self.setLayout(layout)
 
@@ -94,25 +90,36 @@ class ExpenseApp(QWidget):
         row = item.row()
         col = item.column()
         new_value = item.text()
+        print(new_value)
 
         # Получаем значение id из первой ячейки в строке
-        id_value = self.table.item(row, 0).text()
+        id_value = self.table.item(row, col).text()
 
         column_name = self.table.horizontalHeaderItem(col).text()
+        print(column_name)
         query = f"UPDATE Expence SET {column_name} = '{new_value}' WHERE id = {id_value}"
         self.sqlite_manager.execute_query(query)
-    def add_expense(self):
-        # Добавление новой записи в таблицу
-        # Здесь можно добавить диалоговое окно для ввода данных
-        pass
+        print('Donre to aql')
 
-    def add_expense(self):
+    def add_expense_big (self, category, amount):
         # Добавление новой записи в таблицу
         # Здесь можно добавить диалоговое окно для ввода данных
-        self.sqlite_manager.execute_query("INSERT INTO Expence (date, amount, category, comment) VALUES ('2024-03-10', 100.0, 'Food', 'Lunch')")
+
+
+        self.sqlite_manager.execute_query(f"INSERT INTO Expence (date, amount, category, comment) VALUES ('2024-03-10', '{amount.text()}', '{category.currentText()}', 'Lunch')")
 
         # Обновление отображаемых данных в таблице
         self.load_data()
+    def add_expense(self):
+        # Добавление новой записи в таблицу
+        # Здесь можно добавить диалоговое окно для ввода данных
+
+
+        self.sqlite_manager.execute_query(f"INSERT INTO Expence (date, amount, category, comment) VALUES ('2024-03-10', '555', 'Категоия моя ', 'Lunch')")
+
+        # Обновление отображаемых данных в таблице
+        self.load_data()
+
 
     def calculate_daily_total(self, date):
         query = f"SELECT SUM(amount) FROM Expence WHERE date = '{date}'"
