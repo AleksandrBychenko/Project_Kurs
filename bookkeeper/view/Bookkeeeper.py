@@ -69,15 +69,15 @@ class Bookkeeeper(QWidget):
 
         self.expense_changes()
 
+
+    #ДЛЯ РАБОТЫ С ТАБЛИЦОЙ РАСХОДВ
     def expense_changes(self):
         # Проверяем наличие таблицы 'Expence' и создаем ее, если она отсутствует
         self.sqlite_manager.execute_query("CREATE TABLE IF NOT EXISTS expence (id INTEGER PRIMARY KEY, date TEXT, amount REAL, category TEXT, comment TEXT)")
 
-        # Получаем данные из таблицы и отображаем их в таблице
-        # Получаем данные из таблицы без столбца 'id'
+
         data = self.sqlite_manager.fetch_data("SELECT date, amount, category, comment FROM expence")
-        #data = self.sqlite_manager.fetch_data("SELECT * FROM Expence")
-        #data_id = self.sqlite_manager.fetch_data("SELECT id FROM Expence")
+
         self.table.setRowCount(len(data))
         self.table.setColumnCount(len(data[0]) if data else 0)
 
@@ -97,7 +97,7 @@ class Bookkeeeper(QWidget):
         self.table.itemChanged.connect(self.update_data_in_expence)
 
 
-
+    #ДЛЯ ИЗМЕНЕНИЯ БАЗЫ ДАННЫХ ПРИ ИЗМЕНЕНИЕЕ ТАБЛИЦЫ
     def update_data_in_expence (self, item):
         row = item.row()
         col = item.column()
@@ -105,18 +105,16 @@ class Bookkeeeper(QWidget):
         print(new_value)
         print(row)
 
-        # Получаем значение id из первой ячейки в строке
-        #id_value = self.table.item(row, 0).text()
         id_value = row
 
         column_name = self.table.horizontalHeaderItem(col).text()
         print(column_name)
         query = f"UPDATE Expence SET {column_name} = '{new_value}' WHERE id = {id_value}"
         print(query)
-        #query = f"UPDATE Expence SET amount = 450 WHERE id = 3"
+
         self.sqlite_manager.execute_query(query)
-        #self.sqlite_manager.commit()
-        print('Donre to aql')
+
+
 
     def add_expense_big (self, category, amount):
         # Добавление новой записи в таблицу
@@ -126,23 +124,10 @@ class Bookkeeeper(QWidget):
         self.expense_changes()
 
     def Delet_Base(self):
-        # Очистка таблицы
         self.sqlite_manager.execute_query("DELETE FROM expence")
-        # Обновление отображаемых данных в таблице
         self.expense_changes()
 
-    def add_expense_row(self):
-        category = self.category_combo.currentText()
-        amount = self.amount_edit.text()
 
-        # Добавляем новую строку в таблицу с выбранными данными
-        row_position = self.table.rowCount()
-        self.table.insertRow(row_position)
-
-        self.table.setItem(row_position, 0, QTableWidgetItem('Дата'))
-        self.table.setItem(row_position, 1, QTableWidgetItem(amount))
-        self.table.setItem(row_position, 2, QTableWidgetItem(category))
-        self.table.setItem(row_position, 3, QTableWidgetItem('Комментарий'))
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
