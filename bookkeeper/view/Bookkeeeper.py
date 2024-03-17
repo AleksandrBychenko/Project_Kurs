@@ -6,7 +6,7 @@ import sys
 from PySide6.QtWidgets import *
 from budgetview import CustomTable
 
-class ExpenseApp(QWidget):
+class Bookkeeeper(QWidget):
     def __init__(self):
         super().__init__()
         # Создаем вторую таблицу для суммы и бюджета по дням
@@ -22,7 +22,7 @@ class ExpenseApp(QWidget):
 
 
     def init_ui(self):
-        self.setWindowTitle('Expense Tracker')
+        self.setWindowTitle('The Bookkeeeper App')
         layout = QVBoxLayout()
 
         self.label = QLabel("Последние расходы")
@@ -183,7 +183,7 @@ class ExpenseApp(QWidget):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    expense_app = ExpenseApp()
+    expense_app = Bookkeeeper()
     expense_app.show()
 
     sys.exit(app.exec())
