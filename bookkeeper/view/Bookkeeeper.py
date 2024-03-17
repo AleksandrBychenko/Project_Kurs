@@ -78,8 +78,7 @@ class Bookkeeeper(QWidget):
         self.expense_changes()
         self.buget_changes()
 
-        # Связываем изменения в ячейках таблицы с обновлением данных в базе данных
-        self.table.itemChanged.connect(self.update_data_in_expence)
+
 
     #ДЛЯ РАБОТЫ С ТАБЛИЦОЙ РАСХОДВ
     def expense_changes(self):
@@ -104,6 +103,8 @@ class Bookkeeeper(QWidget):
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
+        # Связываем изменения в ячейках таблицы с обновлением данных в базе данных
+        self.table.itemChanged.connect(self.update_data_in_expence)
 
 
     def buget_changes(self):
@@ -147,7 +148,7 @@ class Bookkeeeper(QWidget):
         print(new_value)
         print(row)
 
-        id_value = row
+        id_value = row +1
 
         column_name = self.table.horizontalHeaderItem(col).text()
         print(column_name)
@@ -178,6 +179,8 @@ class Bookkeeeper(QWidget):
         # Здесь можно добавить диалоговое окно для ввода данных
         self.sqlite_manager.execute_query(f"INSERT INTO expence (date, amount, category, comment) VALUES ('2024-03-10', '{amount.text()}', '{category.currentText()}', 'Lunch')")
         # Обновление отображаемых данных в таблице
+        # Связываем изменения в ячейках таблицы с обновлением данных в базе данных
+
         self.expense_changes()
 
     def Delet_Base(self):
