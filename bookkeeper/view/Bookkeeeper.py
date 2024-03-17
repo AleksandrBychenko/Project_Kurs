@@ -124,7 +124,18 @@ class Bookkeeeper(QWidget):
 
         #--------------------
         # Получение всех значений из столбца amount в таблице expence
-        fetch_query = "SELECT amount FROM expence"
+        #fetch_query = "SELECT amount FROM expence"
+        # Получение текущего месяца и года
+        current_month = datetime.now().month
+        current_year = datetime.now().year
+        print(current_month)
+        print(current_year)
+        # Получение всех значений из столбца amount в таблице expence за текущий месяц и год
+        fetch_query = f"""
+            SELECT amount FROM expence
+            WHERE strftime('%m', date) = '{current_month:02d}'
+            AND strftime('%Y', date) = '{current_year}'
+        """
         amounts = self.sqlite_manager.fetch_data(fetch_query)
 
         # Суммирование только числовых значений
