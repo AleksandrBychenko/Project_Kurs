@@ -1,4 +1,6 @@
 import sys
+
+from PySide6.QtGui import QColor
 from PySide6.QtWidgets import *
 from Project_bookkeeper.bookkeeper.repository.sqlite_repository import SQLiteManager
 
@@ -67,6 +69,8 @@ class Bookkeeeper(QWidget):
         button1 = QPushButton("Убрать последнию расходы")
         button2 = QPushButton("Delet base")
 
+        button1.clicked.connect(self.Delet_Last)
+        button2.clicked.connect(self.Delet_Base)
         # Добавляем кнопки в горизонтальный layout
         button_layout.addWidget(button1)
         button_layout.addWidget(button2)
@@ -117,6 +121,8 @@ class Bookkeeeper(QWidget):
                 "INSERT INTO Budget (column1, column2, column3) VALUES ('', '', '')")
             row_count += 1
 
+
+
         data = self.sqlite_manager.fetch_data("SELECT column1, column2, column3 FROM Budget")
 
 
@@ -131,6 +137,14 @@ class Bookkeeeper(QWidget):
         for row_num, row_data in enumerate(data):
             for col_num, col_data in enumerate(row_data):
                 item = QTableWidgetItem(str(col_data))
+                # Установка цвета текста в зависимости от значения
+                try:
+                    if col_num == 2 and float(col_data) > 0:  # Предполагается, что третий столбец содержит числа
+                        item.setForeground(QColor('green'))
+                    elif col_num == 2 and float(col_data) < 0:
+                        item.setForeground(QColor('red'))
+                except ValueError:
+                    pass
                 self.table_widget.setItem(row_num, col_num, item)
 
         # Установка размеров таблицы для заполнения всей доступной высоты окна
@@ -138,7 +152,7 @@ class Bookkeeeper(QWidget):
         self.table_widget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
         # Связываем изменения в ячейках таблицы с обновлением данных в базе данных
-        #self.table_widget.itemChanged.connect(self.update_data_in_budget)
+        self.table_widget.itemChanged.connect(self.update_data_in_budget)
 
     #ДЛЯ ИЗМЕНЕНИЯ БАЗЫ ДАННЫХ ПРИ ИЗМЕНЕНИЕЕ ТАБЛИЦЫ
     def update_data_in_expence (self, item):
@@ -186,7 +200,15 @@ class Bookkeeeper(QWidget):
     def Delet_Base(self):
         self.sqlite_manager.execute_query("DELETE FROM expence")
         self.expense_changes()
+    def Delet_Last(self):
+        # Получение последней добавленной записи из таблицы expence
+        last_expense_id = self.sqlite_manager.fetch_data("SELECT id FROM expence ORDER BY id DESC LIMIT 1")
 
+        if last_expense_id:
+            # Удаление записи по идентификатору
+            self.sqlite_manager.execute_query(f"DELETE FROM expence WHERE id = {last_expense_id[0][0]}")
+            # Обновление отображаемых данных в таблице
+            self.expense_changes()
 
 
 if __name__ == '__main__':
