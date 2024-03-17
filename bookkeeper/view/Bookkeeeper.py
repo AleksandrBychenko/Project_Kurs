@@ -30,7 +30,6 @@ class Bookkeeeper(QWidget):
 
         # Создание таблицы для отображения данных
         self.table = QTableWidget()
-
         self.table.verticalHeader().setVisible(False)  # Скрыть названия строк
         self.table.verticalHeader().setMinimumWidth(0)  # Установить минимальную ширину названий строк
         self.table.verticalHeader().setDefaultSectionSize(25)  # Установить фиксированную высоту строк
@@ -41,18 +40,11 @@ class Bookkeeeper(QWidget):
         layout.addWidget(self.label)
         layout.addWidget(self.daily_table)
 
-
-
-
-
-
         # Создание кнопки для добавления данных
         # Добавляем виджеты для выбора категорий, ввода суммы и кнопки "Add"
         category_combo = QComboBox()
         category_combo.addItems(['Категория 1', 'Категория 2', 'Категория 3'])  # Замените на свои категории
         amount_edit = QLineEdit()
-        #add_button = QPushButton('Add')
-        #add_button.clicked.connect(self.add_expense_row)
 
         layout.addWidget(category_combo)
         layout.addWidget(amount_edit)
@@ -71,19 +63,13 @@ class Bookkeeeper(QWidget):
         button_layout.addWidget(button1)
         button_layout.addWidget(button2)
         layout.addLayout(button_layout)
-
         #button2.clicked.connect(self.Delet_Base)
-
         self.setLayout(layout)
 
 
+        self.expense_changes()
 
-
-
-
-        self.load_data()
-
-    def load_data(self):
+    def expense_changes(self):
         # Проверяем наличие таблицы 'Expence' и создаем ее, если она отсутствует
         self.sqlite_manager.execute_query("CREATE TABLE IF NOT EXISTS expence (id INTEGER PRIMARY KEY, date TEXT, amount REAL, category TEXT, comment TEXT)")
 
@@ -107,15 +93,12 @@ class Bookkeeeper(QWidget):
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
-
-
-
         # Связываем изменения в ячейках таблицы с обновлением данных в базе данных
-        self.table.itemChanged.connect(self.update_data_in_database)
+        self.table.itemChanged.connect(self.update_data_in_expence)
 
 
 
-    def update_data_in_database(self, item):
+    def update_data_in_expence (self, item):
         row = item.row()
         col = item.column()
         new_value = item.text()
@@ -138,35 +121,15 @@ class Bookkeeeper(QWidget):
     def add_expense_big (self, category, amount):
         # Добавление новой записи в таблицу
         # Здесь можно добавить диалоговое окно для ввода данных
-
-
         self.sqlite_manager.execute_query(f"INSERT INTO expence (date, amount, category, comment) VALUES ('2024-03-10', '{amount.text()}', '{category.currentText()}', 'Lunch')")
-
         # Обновление отображаемых данных в таблице
-        self.load_data()
+        self.expense_changes()
 
     def Delet_Base(self):
         # Очистка таблицы
         self.sqlite_manager.execute_query("DELETE FROM expence")
         # Обновление отображаемых данных в таблице
-        self.load_data()
-
-
-    def add_expense(self):
-        # Добавление новой записи в таблицу
-        # Здесь можно добавить диалоговое окно для ввода данных
-
-
-        self.sqlite_manager.execute_query(f"INSERT INTO expence (date, amount, category, comment) VALUES ('2024-03-10', '555', 'Категоия моя ', 'Lunch')")
-
-        # Обновление отображаемых данных в таблице
-        self.load_data()
-
-
-    def calculate_daily_total(self, date):
-        query = f"SELECT SUM(amount) FROM Expence WHERE date = '{date}'"
-        result = self.sqlite_manager.fetch_data(query)
-        return result[0][0] if result[0][0] is not None else 0
+        self.expense_changes()
 
     def add_expense_row(self):
         category = self.category_combo.currentText()
