@@ -7,6 +7,7 @@ from Project_bookkeeper.bookkeeper.repository.sqlite_repository import SQLiteMan
 import sys
 from PySide6.QtWidgets import *
 from budgetview import CustomTable
+from datetime import datetime
 
 class Bookkeeeper(QWidget):
     def __init__(self):
@@ -121,7 +122,56 @@ class Bookkeeeper(QWidget):
                 "INSERT INTO Budget (column1, column2, column3) VALUES ('', '', '')")
             row_count += 1
 
+        #--------------------
+        # Получение всех значений из столбца amount в таблице expence
+        fetch_query = "SELECT amount FROM expence"
+        amounts = self.sqlite_manager.fetch_data(fetch_query)
 
+        # Суммирование только числовых значений
+        total_sum = 0
+        for amount in amounts:
+            try:
+                # Пытаемся преобразовать значение в число и прибавить его к общей сумме
+                total_sum += float(amount[0])
+            except ValueError:
+                # Если не удалось преобразовать в число, пропускаем это значение
+                continue
+
+        # Обновляем первый столбец в таблице Budget, где id = 2, значением суммы
+        update_query = f"UPDATE Budget SET column1 = {total_sum} WHERE id = 2"
+        self.sqlite_manager.execute_query(update_query)
+
+        #-----------
+        # Обновляем первый столбец в таблице Budget, где id = 2, значением суммы
+        for i in range(3):
+            try:
+                update_query = f"UPDATE Budget SET column3 = column2 - column1  WHERE id = {i+1}"
+                self.sqlite_manager.execute_query(update_query)
+            except ValueError:
+                # Если не удалось преобразовать в число, пропускаем это значение
+                continue
+
+        # Получение всех значений из двух столбцов в таблице expence
+        fetch_query = "SELECT column1 FROM budget"
+        amounts = self.sqlite_manager.fetch_data(fetch_query)
+
+        # Суммирование значений из двух столбцов
+
+        for amount1 in amounts:
+            print(amount1, "{{{")
+            """
+            #try:
+                # Пытаемся преобразовать значения в числа и прибавить их к общей сумме
+                total_sum = float(amount1) + float(amount2)
+                # Обновляем первый столбец в таблице Budget, где id = 2, значением суммы
+                update_query = f"UPDATE Budget SET column1 = {total_sum} WHERE id = 2"
+                self.sqlite_manager.execute_query(update_query)
+
+            #except ValueError:
+                # Если не удалось преобразовать в число, пропускаем это значение
+            #    continue
+            """
+        #--------------
 
         data = self.sqlite_manager.fetch_data("SELECT column1, column2, column3 FROM Budget")
 
@@ -170,6 +220,7 @@ class Bookkeeeper(QWidget):
         print(query)
 
         self.sqlite_manager.execute_query(query)
+        self.buget_changes()
 
     def update_data_in_budget (self, item):
         row = item.row()
@@ -191,15 +242,17 @@ class Bookkeeeper(QWidget):
     def add_expense_big (self, category, amount):
         # Добавление новой записи в таблицу
         # Здесь можно добавить диалоговое окно для ввода данных
-        self.sqlite_manager.execute_query(f"INSERT INTO expence (date, amount, category, comment) VALUES ('2024-03-10', '{amount.text()}', '{category.currentText()}', 'Lunch')")
+        self.sqlite_manager.execute_query(f"INSERT INTO expence (date, amount, category, comment) VALUES ('{datetime.now().date()}', '{amount.text()}', '{category.currentText()}', 'Lunch')")
         # Обновление отображаемых данных в таблице
         # Связываем изменения в ячейках таблицы с обновлением данных в базе данных
 
         self.expense_changes()
+        self.buget_changes()
 
     def Delet_Base(self):
         self.sqlite_manager.execute_query("DELETE FROM expence")
         self.expense_changes()
+        self.buget_changes()
     def Delet_Last(self):
         # Получение последней добавленной записи из таблицы expence
         last_expense_id = self.sqlite_manager.fetch_data("SELECT id FROM expence ORDER BY id DESC LIMIT 1")
@@ -209,7 +262,7 @@ class Bookkeeeper(QWidget):
             self.sqlite_manager.execute_query(f"DELETE FROM expence WHERE id = {last_expense_id[0][0]}")
             # Обновление отображаемых данных в таблице
             self.expense_changes()
-
+            self.buget_changes()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
