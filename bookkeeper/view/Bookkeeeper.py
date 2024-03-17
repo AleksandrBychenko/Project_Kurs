@@ -14,7 +14,7 @@ class Bookkeeeper(QWidget):
         self.daily_table.set_table_header(['Сумма', 'Бюджет', 'Разница'])
         self.daily_table.set_row_labels(['День', 'Месяц', 'Год'])
 
-        self.sqlite_manager = SQLiteManager('expence.db')
+        self.sqlite_manager = SQLiteManager('expence3.db')
         self.init_ui()
 
 
@@ -78,6 +78,9 @@ class Bookkeeeper(QWidget):
         self.expense_changes()
         self.buget_changes()
 
+        # Связываем изменения в ячейках таблицы с обновлением данных в базе данных
+        self.table.itemChanged.connect(self.update_data_in_expence)
+
     #ДЛЯ РАБОТЫ С ТАБЛИЦОЙ РАСХОДВ
     def expense_changes(self):
         # Проверяем наличие таблицы 'Expence' и создаем ее, если она отсутствует
@@ -101,8 +104,7 @@ class Bookkeeeper(QWidget):
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
-        # Связываем изменения в ячейках таблицы с обновлением данных в базе данных
-        self.table.itemChanged.connect(self.update_data_in_expence)
+
 
     def buget_changes(self):
         self.sqlite_manager.execute_query("CREATE TABLE IF NOT EXISTS Budget (id INTEGER PRIMARY KEY, column1 TEXT, column2 TEXT, column3 TEXT)")
@@ -114,7 +116,7 @@ class Bookkeeeper(QWidget):
                 "INSERT INTO Budget (column1, column2, column3) VALUES ('', '', '')")
             row_count += 1
 
-        data = self.sqlite_manager.fetch_data("SELECT * FROM Budget")
+        data = self.sqlite_manager.fetch_data("SELECT column1, column2, column3 FROM Budget")
 
 
 
@@ -135,7 +137,7 @@ class Bookkeeeper(QWidget):
         self.table_widget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
         # Связываем изменения в ячейках таблицы с обновлением данных в базе данных
-        self.table_widget.itemChanged.connect(self.update_data_in_budget)
+        #self.table_widget.itemChanged.connect(self.update_data_in_budget)
 
     #ДЛЯ ИЗМЕНЕНИЯ БАЗЫ ДАННЫХ ПРИ ИЗМЕНЕНИЕЕ ТАБЛИЦЫ
     def update_data_in_expence (self, item):
