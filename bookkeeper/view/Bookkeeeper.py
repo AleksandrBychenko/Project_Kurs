@@ -38,7 +38,15 @@ class Bookkeeeper(QWidget):
 
         self.label = QLabel("Бюджет")
         layout.addWidget(self.label)
-        layout.addWidget(self.daily_table)
+
+        self.table_widget = QTableWidget(3, 3)  # Создание таблицы 3x3
+        # Для автоматического растяжения таблицы по высоте виджета
+        self.table_widget.setFixedHeight(150)
+        self.table_widget.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        layout.addWidget(self.table_widget)
+
+        #layout.addWidget(self.label)
+        #layout.addWidget(self.daily_table)
 
         # Создание кнопки для добавления данных
         # Добавляем виджеты для выбора категорий, ввода суммы и кнопки "Add"
@@ -68,7 +76,7 @@ class Bookkeeeper(QWidget):
 
 
         self.expense_changes()
-
+        self.buget_changes()
 
     #ДЛЯ РАБОТЫ С ТАБЛИЦОЙ РАСХОДВ
     def expense_changes(self):
@@ -96,6 +104,38 @@ class Bookkeeeper(QWidget):
         # Связываем изменения в ячейках таблицы с обновлением данных в базе данных
         self.table.itemChanged.connect(self.update_data_in_expence)
 
+    def buget_changes(self):
+        self.sqlite_manager.execute_query("CREATE TABLE IF NOT EXISTS Budget (id INTEGER PRIMARY KEY, column1 TEXT, column2 TEXT, column3 TEXT)")
+
+        row_count = self.sqlite_manager.fetch_data("SELECT COUNT(*) FROM Budget")[0][0]
+        # Добавление пустых строк, если их меньше 3
+        while row_count < 3:
+            self.sqlite_manager.execute_query(
+                "INSERT INTO Budget (column1, column2, column3) VALUES ('', '', '')")
+            row_count += 1
+
+        data = self.sqlite_manager.fetch_data("SELECT * FROM Budget")
+
+
+
+        # Установка названий строк и столбцов
+        row_headers = ['Row 1', 'Row 2', 'Row 3']
+        column_headers = ['column1', 'column2', 'column3']
+        self.table_widget.setVerticalHeaderLabels(row_headers)
+        self.table_widget.setHorizontalHeaderLabels(column_headers)
+
+        # Заполнение таблицы данными из базы данных
+        for row_num, row_data in enumerate(data):
+            for col_num, col_data in enumerate(row_data):
+                item = QTableWidgetItem(str(col_data))
+                self.table_widget.setItem(row_num, col_num, item)
+
+        # Установка размеров таблицы для заполнения всей доступной высоты окна
+        self.table_widget.horizontalHeader().setStretchLastSection(True)
+        self.table_widget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+
+        # Связываем изменения в ячейках таблицы с обновлением данных в базе данных
+        self.table_widget.itemChanged.connect(self.update_data_in_budget)
 
     #ДЛЯ ИЗМЕНЕНИЯ БАЗЫ ДАННЫХ ПРИ ИЗМЕНЕНИЕЕ ТАБЛИЦЫ
     def update_data_in_expence (self, item):
@@ -114,6 +154,21 @@ class Bookkeeeper(QWidget):
 
         self.sqlite_manager.execute_query(query)
 
+    def update_data_in_budget (self, item):
+        row = item.row()
+        col = item.column()
+        new_value = item.text()
+        print(new_value)
+        print(row)
+
+        id_value = row + 1
+
+        column_name = self.table_widget.horizontalHeaderItem(col).text()
+        print(column_name)
+        query = f"UPDATE Budget SET {column_name} = '{new_value}' WHERE id = {id_value}"
+        print(query)
+
+        self.sqlite_manager.execute_query(query)
 
 
     def add_expense_big (self, category, amount):
