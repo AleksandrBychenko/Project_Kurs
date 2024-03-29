@@ -51,6 +51,12 @@ class Bookkeeeper(QWidget):
         self.budget_table = BudgetTableWidget(self.sqlite_manager)
         layout.addWidget(self.budget_table)
 
+        self.button = QPushButton("Пересчитать данные")
+        self.button.clicked.connect(self.on_button_clicked)
+        layout.addWidget(self.button)
+
+        self.label = QLabel("Настройки:")
+        layout.addWidget(self.label)
         '''
         self.table_widget = QTableWidget(3, 3)  # Создание таблицы 3x3
         # Для автоматического растяжения таблицы по высоте виджета
@@ -352,6 +358,10 @@ class Bookkeeeper(QWidget):
             # self.expense_changes()
             # self.buget_changes()
             self.budget_table.buget_changes()
+
+    def on_button_clicked(self):
+        self.expense_table.expense_changes()
+        self.budget_table.buget_changes()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
