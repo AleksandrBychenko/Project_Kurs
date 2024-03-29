@@ -2,6 +2,8 @@ import sys
 
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import *
+
+from Project_bookkeeper.bookkeeper.models.expense import ExpenseTableWidget
 from Project_bookkeeper.bookkeeper.repository.sqlite_repository import SQLiteManager
 
 import sys
@@ -12,10 +14,6 @@ from datetime import datetime
 class Bookkeeeper(QWidget):
     def __init__(self):
         super().__init__()
-        # Создаем вторую таблицу для суммы и бюджета по дням
-        self.daily_table = CustomTable(3, 3)
-        self.daily_table.set_table_header(['Сумма', 'Бюджет', 'Разница'])
-        self.daily_table.set_row_labels(['День', 'Месяц', 'Год'])
 
         self.sqlite_manager = SQLiteManager('expence3.db')
         self.init_ui()
@@ -25,18 +23,24 @@ class Bookkeeeper(QWidget):
 
 
     def init_ui(self):
-        self.setWindowTitle('The Bookkeeeper App')
+        self.setWindowTitle('The Bookkeeper App')
         layout = QVBoxLayout()
 
         self.label = QLabel("Последние расходы")
         layout.addWidget(self.label)
 
+        '''
         # Создание таблицы для отображения данных
         self.table = QTableWidget()
         self.table.verticalHeader().setVisible(False)  # Скрыть названия строк
         self.table.verticalHeader().setMinimumWidth(0)  # Установить минимальную ширину названий строк
         self.table.verticalHeader().setDefaultSectionSize(25)  # Установить фиксированную высоту строк
         layout.addWidget(self.table)
+        '''
+
+        self.expense_table = ExpenseTableWidget(self.sqlite_manager)
+        layout.addWidget(self.expense_table)
+
 
 
         self.label = QLabel("Бюджет")
@@ -79,8 +83,8 @@ class Bookkeeeper(QWidget):
         #button2.clicked.connect(self.Delet_Base)
         self.setLayout(layout)
 
-
-        self.expense_changes()
+        self.expense_table.expense_changes()
+        #self.expense_changes()
         self.buget_changes()
 
 
