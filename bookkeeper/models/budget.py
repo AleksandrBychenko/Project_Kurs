@@ -33,67 +33,9 @@ class BudgetTableWidget(QTableWidget):
                 "INSERT INTO Budget (column1, column2, column3) VALUES ('', '', '')")
             row_count += 1
 
-        # --------------------
-        # Получение всех значений из столбца amount в таблице expence
-        # fetch_query = "SELECT amount FROM expence"
-        # Получение текущего месяца и года
-        current_month = datetime.now().month
-        current_year = datetime.now().year
-        print(current_month)
-        print(current_year)
-        # Получение всех значений из столбца amount в таблице expence за текущий месяц и год
-        fetch_query = f"""
-            SELECT amount FROM expence
-            WHERE strftime('%m', date) = '{current_month:02d}'
-            AND strftime('%Y', date) = '{current_year}'
-        """
-        amounts = self.sqlite_manager.fetch_data(fetch_query)
 
-        # Суммирование только числовых значений
-        total_sum = 0
-        for amount in amounts:
-            try:
-                # Пытаемся преобразовать значение в число и прибавить его к общей сумме
-                total_sum += float(amount[0])
-            except ValueError:
-                # Если не удалось преобразовать в число, пропускаем это значение
-                continue
 
-        # Обновляем первый столбец в таблице Budget, где id = 2, значением суммы
-        update_query = f"UPDATE Budget SET column1 = {total_sum} WHERE id = 2"
-        self.sqlite_manager.execute_query(update_query)
-
-        # -----------
-        # Обновляем первый столбец в таблице Budget, где id = 2, значением суммы
-        for i in range(3):
-            try:
-                update_query = f"UPDATE Budget SET column3 = column2 - column1  WHERE id = {i + 1}"
-                self.sqlite_manager.execute_query(update_query)
-            except ValueError:
-                # Если не удалось преобразовать в число, пропускаем это значение
-                continue
-
-        # Получение всех значений из двух столбцов в таблице expence
-        fetch_query = "SELECT column1 FROM budget"
-        amounts = self.sqlite_manager.fetch_data(fetch_query)
-
-        # Суммирование значений из двух столбцов
-
-        for amount1 in amounts:
-            print(amount1, "{{{")
-            """
-            #try:
-                # Пытаемся преобразовать значения в числа и прибавить их к общей сумме
-                total_sum = float(amount1) + float(amount2)
-                # Обновляем первый столбец в таблице Budget, где id = 2, значением суммы
-                update_query = f"UPDATE Budget SET column1 = {total_sum} WHERE id = 2"
-                self.sqlite_manager.execute_query(update_query)
-
-            #except ValueError:
-                # Если не удалось преобразовать в число, пропускаем это значение
-            #    continue
-            """
-        # --------------
+        self.ostatok()
 
         data = self.sqlite_manager.fetch_data("SELECT column1, column2, column3 FROM Budget")
 
@@ -124,6 +66,100 @@ class BudgetTableWidget(QTableWidget):
         # Связываем изменения в ячейках таблицы с обновлением данных в базе данных
         self.table_widget.itemChanged.connect(self.update_data_in_budget)
 
+    def ostatok(self):
+        # --------------------
+        # Получение всех значений из столбца amount в таблице expence
+        # fetch_query = "SELECT amount FROM expence"
+        # Получение текущего месяца и года
+        current_month = datetime.now().month
+        current_year = datetime.now().year
+
+        # Получение текущей даты и времени
+        now = datetime.now()
+        year_now, current_week = now.isocalendar()[:2]
+        # Получение номера текущего дня
+        current_day = now.day
+
+        print(current_month)
+        print(current_year)
+        print(current_week)
+        print(current_day)
+        # Получение всех значений из столбца amount в таблице expence за текущий месяц и год
+        fetch_query = f"""
+                    SELECT amount FROM expence
+                    WHERE strftime('%m', date) = '{current_month:02d}'
+                    AND strftime('%Y', date) = '{current_year}'
+                """
+        amounts = self.sqlite_manager.fetch_data(fetch_query)
+
+        # Суммирование только числовых значений
+        total_sum = 0
+        for amount in amounts:
+            try:
+                # Пытаемся преобразовать значение в число и прибавить его к общей сумме
+                total_sum += float(amount[0])
+            except ValueError:
+                # Если не удалось преобразовать в число, пропускаем это значение
+                continue
+
+        # Обновляем первый столбец в таблице Budget, где id = 2, значением суммы
+        update_query = f"UPDATE Budget SET column1 = {total_sum} WHERE id = 3"
+        self.sqlite_manager.execute_query(update_query)
+
+        # -----------
+
+        # Получение всех значений из столбца amount в таблице expence за текущий месяц и год
+        fetch_query = f"""
+                    SELECT amount FROM expence
+                    WHERE strftime('%d', date) = '{current_day}'
+                    AND strftime('%Y', date) = '{current_year}'
+                """
+        amounts = self.sqlite_manager.fetch_data(fetch_query)
+        # Суммирование только числовых значений
+        total_sum = 0
+        for amount in amounts:
+            try:
+                # Пытаемся преобразовать значение в число и прибавить его к общей сумме
+                total_sum += float(amount[0])
+            except ValueError:
+                # Если не удалось преобразовать в число, пропускаем это значение
+                continue
+        # Обновляем первый столбец в таблице Budget, где id = 2, значением суммы
+        update_query = f"UPDATE Budget SET column1 = {total_sum} WHERE id = 1"
+        self.sqlite_manager.execute_query(update_query)
+        # -----------
+        # -----------
+
+        # Получение всех значений из столбца amount в таблице expence за текущий месяц и год
+        fetch_query = f"""
+                    SELECT amount FROM expence
+                    WHERE strftime('%W', date) = '{current_week}'
+                    AND strftime('%Y', date) = '{current_year}'
+                """
+        amounts = self.sqlite_manager.fetch_data(fetch_query)
+        # Суммирование только числовых значений
+        total_sum = 0
+        for amount in amounts:
+            try:
+                # Пытаемся преобразовать значение в число и прибавить его к общей сумме
+                total_sum += float(amount[0])
+            except ValueError:
+                # Если не удалось преобразовать в число, пропускаем это значение
+                continue
+        # Обновляем первый столбец в таблице Budget, где id = 2, значением суммы
+        update_query = f"UPDATE Budget SET column1 = {total_sum} WHERE id = 2"
+        self.sqlite_manager.execute_query(update_query)
+
+        # -----------
+        # Обновляем первый столбец в таблице Budget, где id = 2, значением суммы
+        for i in range(3):
+            try:
+                update_query = f"UPDATE Budget SET column3 = column2 - column1  WHERE id = {i + 1}"
+                self.sqlite_manager.execute_query(update_query)
+            except ValueError:
+                # Если не удалось преобразовать в число, пропускаем это значение
+                continue
+
     def update_data_in_budget(self, item):
         row = item.row()
         col = item.column()
@@ -145,3 +181,4 @@ class BudgetTableWidget(QTableWidget):
         print(query)
 
         self.sqlite_manager.execute_query(query)
+

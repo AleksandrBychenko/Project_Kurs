@@ -5,7 +5,10 @@ from PySide6.QtWidgets import *
 
 from Project_bookkeeper.bookkeeper.models.budget import BudgetTableWidget
 from Project_bookkeeper.bookkeeper.models.expense import ExpenseTableWidget
+from Project_bookkeeper.bookkeeper.repository.abstract_repository import AbstractRepository
 from Project_bookkeeper.bookkeeper.repository.sqlite_repository import SQLiteManager
+
+from Project_bookkeeper.bookkeeper.models.category import Category
 
 import sys
 from PySide6.QtWidgets import *
@@ -61,8 +64,68 @@ class Bookkeeeper(QWidget):
 
         # Создание кнопки для добавления данных
         # Добавляем виджеты для выбора категорий, ввода суммы и кнопки "Add"
+        # Инициализация репозитория категорий
+
+        repo = AbstractRepository[Category]()
+
+        # Создаем дерево категорий
+        tree = [
+            ('Тип расхода', None),
+            ('Прочее', None),
+            ('Ежемесячные траты', None),
+            ('Еда', None),
+            ('Напитки', None),
+            ('Еда -> Овощи', 'Еда'),
+            ('Еда -> Фрукты', 'Еда'),
+            ('Напитки -> Холодные напитки', 'Напитки'),
+            ('Напитки -> Горячие напитки', 'Напитки'),
+            ('Одежда', None),
+            ('Медицина', None),
+            ('Непредвиденные расходы', None),
+
+        ]
+
+        # Создаем категории из дерева
+        categories = Category.create_from_tree(tree, repo)
+
         category_combo = QComboBox()
-        category_combo.addItems(['Категория 1', 'Категория 2', 'Категория 3'])  # Замените на свои категории
+
+        # Получаем все категории из репозитория
+        all_categories = repo.get_all()
+        # Заполняем QComboBox названиями категорий
+        for category in all_categories:
+            category_combo.addItem(category.name)
+        #category_combo.addItems(['Категория 1', 'Категория 2', 'Категория 3'])  # Замените на свои категории
+
+
+        '''
+        # Создаем дерево категорий
+        tree_dict = {
+            'Food': {
+                'Vegetables': {},
+                'Fruits': {}
+            },
+            'Drinks': {
+                'Cold drinks': {},
+                'Hot drinks': {}
+            }
+        }
+
+        # Функция для рекурсивного добавления категорий в QComboBox
+        def add_categories_to_combo(combo, tree, parent=None):
+            for category, subcategories in tree.items():
+                if parent is None:
+                    combo.addItem(category)
+                else:
+                    combo.addItem(f"{parent} -> {category}")
+                add_categories_to_combo(combo, subcategories, category)
+
+        # Создаем QComboBox
+        category_combo = QComboBox()
+
+        # Заполняем QComboBox категориями
+        add_categories_to_combo(category_combo, tree_dict)
+        '''
         amount_edit = QLineEdit()
 
         layout.addWidget(category_combo)
@@ -267,7 +330,7 @@ class Bookkeeeper(QWidget):
         # Связываем изменения в ячейках таблицы с обновлением данных в базе данных
 
         self.expense_table.expense_changes()
-        #self.expense_changes()
+        #self.expxense_changes()
         #self.buget_changes()
         self.budget_table.buget_changes()
 

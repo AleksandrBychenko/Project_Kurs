@@ -50,9 +50,20 @@ class ExpenseTableWidget(QTableWidget):
         id_value = row + 1
 
         column_name = self.horizontalHeaderItem(col).text()
+        if column_name == 'Дата':
+            column_name = 'date'
+        if column_name == 'Сумма':
+            column_name = 'amount'
+        if column_name == 'Категория':
+            column_name = 'category'
+        if column_name == 'Комментарий':
+            column_name = 'comment'
+
         #print(column_name)
         query = f"UPDATE Expence SET {column_name} = '{new_value}' WHERE id = {id_value}"
         #print(query)
 
         self.sqlite_manager.execute_query(query)
         #self.buget_changes()
+
+
