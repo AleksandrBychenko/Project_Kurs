@@ -34,6 +34,8 @@ class ExpenseTableWidget(QTableWidget):
         # Установка размеров таблицы для заполнения всей доступной высоты окна
         self.horizontalHeader().setStretchLastSection(True)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        column_headers = ['Дата', 'Сумма', 'Категория', 'Комментарий']
+        self.setHorizontalHeaderLabels(column_headers)
 
         # Связываем изменения в ячейках таблицы с обновлением данных в базе данных
         self.itemChanged.connect(self.update_data_in_expence)

@@ -9,7 +9,7 @@ from Project_bookkeeper.bookkeeper.repository.sqlite_repository import SQLiteMan
 
 import sys
 from PySide6.QtWidgets import *
-from budgetview import CustomTable
+
 from datetime import datetime
 
 class Bookkeeeper(QWidget):
@@ -75,8 +75,8 @@ class Bookkeeeper(QWidget):
         # Создаем горизонтальный layout для кнопок
         button_layout = QHBoxLayout()
         # Создаем кнопки
-        button1 = QPushButton("Убрать последнию расходы")
-        button2 = QPushButton("Delet base")
+        button1 = QPushButton("Убрать последний Расход")
+        button2 = QPushButton("Удалить базу данных Расходы")
 
         button1.clicked.connect(self.Delet_Last)
         button2.clicked.connect(self.Delet_Base)
@@ -262,7 +262,7 @@ class Bookkeeeper(QWidget):
     def add_expense_big (self, category, amount):
         # Добавление новой записи в таблицу
         # Здесь можно добавить диалоговое окно для ввода данных
-        self.sqlite_manager.execute_query(f"INSERT INTO expence (date, amount, category, comment) VALUES ('{datetime.now().date()}', '{amount.text()}', '{category.currentText()}', 'Lunch')")
+        self.sqlite_manager.execute_query(f"INSERT INTO expence (date, amount, category, comment) VALUES ('{datetime.now().date()}', '{amount.text()}', '{category.currentText()}', '')")
         # Обновление отображаемых данных в таблице
         # Связываем изменения в ячейках таблицы с обновлением данных в базе данных
 
@@ -273,8 +273,10 @@ class Bookkeeeper(QWidget):
 
     def Delet_Base(self):
         self.sqlite_manager.execute_query("DELETE FROM expence")
-        self.expense_changes()
-        self.buget_changes()
+        self.expense_table.expense_changes()
+        #self.expense_changes()
+        #self.buget_changes()
+        self.budget_table.buget_changes()
     def Delet_Last(self):
         # Получение последней добавленной записи из таблицы expence
         last_expense_id = self.sqlite_manager.fetch_data("SELECT id FROM expence ORDER BY id DESC LIMIT 1")
@@ -283,8 +285,10 @@ class Bookkeeeper(QWidget):
             # Удаление записи по идентификатору
             self.sqlite_manager.execute_query(f"DELETE FROM expence WHERE id = {last_expense_id[0][0]}")
             # Обновление отображаемых данных в таблице
-            self.expense_changes()
-            self.buget_changes()
+            self.expense_table.expense_changes()
+            # self.expense_changes()
+            # self.buget_changes()
+            self.budget_table.buget_changes()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
