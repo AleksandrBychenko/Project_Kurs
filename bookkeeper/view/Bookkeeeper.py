@@ -3,6 +3,7 @@ import sys
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import *
 
+from Project_bookkeeper.bookkeeper.models.budget import BudgetTableWidget
 from Project_bookkeeper.bookkeeper.models.expense import ExpenseTableWidget
 from Project_bookkeeper.bookkeeper.repository.sqlite_repository import SQLiteManager
 
@@ -41,16 +42,19 @@ class Bookkeeeper(QWidget):
         self.expense_table = ExpenseTableWidget(self.sqlite_manager)
         layout.addWidget(self.expense_table)
 
-
-
         self.label = QLabel("Бюджет")
         layout.addWidget(self.label)
 
+        self.budget_table = BudgetTableWidget(self.sqlite_manager)
+        layout.addWidget(self.budget_table)
+
+        '''
         self.table_widget = QTableWidget(3, 3)  # Создание таблицы 3x3
         # Для автоматического растяжения таблицы по высоте виджета
         self.table_widget.setFixedHeight(150)
         self.table_widget.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
         layout.addWidget(self.table_widget)
+        '''
 
         #layout.addWidget(self.label)
         #layout.addWidget(self.daily_table)
@@ -64,7 +68,7 @@ class Bookkeeeper(QWidget):
         layout.addWidget(category_combo)
         layout.addWidget(amount_edit)
 
-        add_button = QPushButton('Add Expense')
+        add_button = QPushButton('Добавить Расходы')
         add_button.clicked.connect(lambda: self.add_expense_big(category_combo, amount_edit))
         layout.addWidget(add_button)
 
@@ -85,10 +89,11 @@ class Bookkeeeper(QWidget):
 
         self.expense_table.expense_changes()
         #self.expense_changes()
-        self.buget_changes()
+        #self.buget_changes()
+        self.budget_table.buget_changes()
 
 
-
+    '''
     #ДЛЯ РАБОТЫ С ТАБЛИЦОЙ РАСХОДВ
     def expense_changes(self):
         # Проверяем наличие таблицы 'Expence' и создаем ее, если она отсутствует
@@ -218,7 +223,7 @@ class Bookkeeeper(QWidget):
 
         # Связываем изменения в ячейках таблицы с обновлением данных в базе данных
         self.table_widget.itemChanged.connect(self.update_data_in_budget)
-
+    '''
     #ДЛЯ ИЗМЕНЕНИЯ БАЗЫ ДАННЫХ ПРИ ИЗМЕНЕНИЕЕ ТАБЛИЦЫ
     def update_data_in_expence (self, item):
         row = item.row()
@@ -261,8 +266,10 @@ class Bookkeeeper(QWidget):
         # Обновление отображаемых данных в таблице
         # Связываем изменения в ячейках таблицы с обновлением данных в базе данных
 
-        self.expense_changes()
-        self.buget_changes()
+        self.expense_table.expense_changes()
+        #self.expense_changes()
+        #self.buget_changes()
+        self.budget_table.buget_changes()
 
     def Delet_Base(self):
         self.sqlite_manager.execute_query("DELETE FROM expence")
