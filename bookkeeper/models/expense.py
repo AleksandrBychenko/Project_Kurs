@@ -11,7 +11,6 @@ class ExpenseTableWidget(QTableWidget):
         self.verticalHeader().setVisible(False)
         self.verticalHeader().setMinimumWidth(0)
         self.verticalHeader().setDefaultSectionSize(25)
-        #self.setFixedHeight(150)
         self.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
     def expense_changes(self):
@@ -44,8 +43,6 @@ class ExpenseTableWidget(QTableWidget):
         row = item.row()
         col = item.column()
         new_value = item.text()
-        #print(new_value)
-        #print(row)
 
         id_value = row + 1
 

@@ -9,15 +9,8 @@ class BudgetTableWidget(QTableWidget):
         self.initUI()
 
     def initUI(self):
-        '''
-        layout = QVBoxLayout(self)
-        self.label = QLabel("Бюджет")
-        layout.addWidget(self.label)
-        '''
         layout = QVBoxLayout(self)
         self.table_widget = QTableWidget(3, 3)  # Создание таблицы 3x3
-        # Названия столбцов
-
 
         self.table_widget.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
         layout.addWidget(self.table_widget)
@@ -67,23 +60,17 @@ class BudgetTableWidget(QTableWidget):
         self.table_widget.itemChanged.connect(self.update_data_in_budget)
 
     def ostatok(self):
-        # --------------------
-        # Получение всех значений из столбца amount в таблице expence
-        # fetch_query = "SELECT amount FROM expence"
+
         # Получение текущего месяца и года
         current_month = datetime.now().month
         current_year = datetime.now().year
-
+        current_day = datetime.now().day
         # Получение текущей даты и времени
         now = datetime.now()
         year_now, current_week = now.isocalendar()[:2]
         # Получение номера текущего дня
-        current_day = now.day
+        #current_day = now.day
 
-        print(current_month)
-        print(current_year)
-        print(current_week)
-        print(current_day)
         # Получение всех значений из столбца amount в таблице expence за текущий месяц и год
         fetch_query = f"""
                     SELECT amount FROM expence
@@ -108,12 +95,13 @@ class BudgetTableWidget(QTableWidget):
 
         # -----------
 
-        # Получение всех значений из столбца amount в таблице expence за текущий месяц и год
+        # Получение всех значений из столбца amount в таблице expence за текущий месяц и день
         fetch_query = f"""
                     SELECT amount FROM expence
-                    WHERE strftime('%d', date) = '{current_day}'
+                    WHERE strftime('%d', date) = '{current_day:02d}'
                     AND strftime('%Y', date) = '{current_year}'
                 """
+        print("Day:", current_day)
         amounts = self.sqlite_manager.fetch_data(fetch_query)
         # Суммирование только числовых значений
         total_sum = 0
@@ -127,7 +115,6 @@ class BudgetTableWidget(QTableWidget):
         # Обновляем первый столбец в таблице Budget, где id = 2, значением суммы
         update_query = f"UPDATE Budget SET column1 = {total_sum} WHERE id = 1"
         self.sqlite_manager.execute_query(update_query)
-        # -----------
         # -----------
 
         # Получение всех значений из столбца amount в таблице expence за текущий месяц и год
@@ -149,7 +136,6 @@ class BudgetTableWidget(QTableWidget):
         # Обновляем первый столбец в таблице Budget, где id = 2, значением суммы
         update_query = f"UPDATE Budget SET column1 = {total_sum} WHERE id = 2"
         self.sqlite_manager.execute_query(update_query)
-
         # -----------
         # Обновляем первый столбец в таблице Budget, где id = 2, значением суммы
         for i in range(3):
@@ -170,7 +156,6 @@ class BudgetTableWidget(QTableWidget):
         id_value = row + 1
 
         column_name = self.table_widget.horizontalHeaderItem(col).text()
-        print(column_name)
         if column_name == 'Траты':
             column_name = 'column1'
         if column_name == 'Бюджет':
@@ -178,7 +163,6 @@ class BudgetTableWidget(QTableWidget):
         if column_name == 'Остаток':
             column_name = 'column3'
         query = f"UPDATE Budget SET {column_name} = '{new_value}' WHERE id = {id_value}"
-        print(query)
 
         self.sqlite_manager.execute_query(query)
 
