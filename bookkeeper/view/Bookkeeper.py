@@ -18,7 +18,7 @@ from datetime import datetime
 class Bookkeeeper(QWidget):
     def __init__(self):
         super().__init__()
-        self.sqlite_manager = SQLiteManager('expence3.db')
+        self.sqlite_manager = SQLiteManager('DatabaseBookkeeper.db')
         self.init_ui()
 
     def init_ui(self):
@@ -131,9 +131,4 @@ class Bookkeeeper(QWidget):
         self.expense_table.expense_changes()
         self.budget_table.buget_changes()
 
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    expense_app = Bookkeeeper()
-    expense_app.show()
 
-    sys.exit(app.exec())
