@@ -64,6 +64,8 @@ class Bookkeeeper(QWidget):
 
         ]
 
+        # Создаем категории из дерева
+        categories = Category.create_from_tree(tree, repo)
 
         category_combo = QComboBox()
         # Получаем все категории из репозитория
