@@ -8,7 +8,7 @@ from Project_bookkeeper.bookkeeper.models.expense import ExpenseTableWidget
 from Project_bookkeeper.bookkeeper.repository.abstract_repository import AbstractRepository
 from Project_bookkeeper.bookkeeper.repository.sqlite_repository import SQLiteManager
 
-from Project_bookkeeper.bookkeeper.models.category import Category, CategoryEditor, CategoryEditor2, AbstractRepository2
+from Project_bookkeeper.bookkeeper.models.category import Category, CategoryEditor
 
 import sys
 from PySide6.QtWidgets import *
@@ -45,17 +45,9 @@ class Bookkeeeper(QWidget):
         self.label = QLabel("Настройки:")
         layout.addWidget(self.label)
 
-        repo = AbstractRepository2('DatabaseBookkeeper.db')  # Используйте путь к вашей базе данных
-        self.category_combo = CategoryEditor2(repo)
+        repo = AbstractRepository('DatabaseBookkeeper.db')
+        self.category_combo = CategoryEditor(repo)
         layout.addWidget(self.category_combo)
-
-        #self.cat = self.category_combo.category_combo
-        #layout.addWidget(self.cat)
-        '''
-        edit_categories_button = QPushButton("Редактировать категории")
-        edit_categories_button.clicked.connect(self.open_category_editor)
-        layout.addWidget(edit_categories_button )
-        '''
 
         amount_edit = QLineEdit()
         layout.addWidget(amount_edit)
@@ -63,7 +55,6 @@ class Bookkeeeper(QWidget):
         add_button.clicked.connect(lambda: self.add_expense_big(self.category_combo, amount_edit))
         layout.addWidget(add_button)
 
-        # Создаем горизонтальный layout для кнопок
         button_layout = QHBoxLayout()
         # Создаем кнопки
         button1 = QPushButton("Убрать последний Расход")
@@ -80,10 +71,6 @@ class Bookkeeeper(QWidget):
         # Что будет пори изменении клеток в таблицах
         self.expense_table.expense_changes()
         self.budget_table.buget_changes()
-
-    def open_category_editor(self):
-        self.category_editor_window = CategoryEditorWindow(self.category_combo)
-        self.category_editor_window.show()
 
     # Функция для кнопки Добавить щначение в базу данных
     def add_expense_big (self, category, amount):
@@ -116,14 +103,3 @@ class Bookkeeeper(QWidget):
         self.budget_table.buget_changes()
 
 
-# Основной класс редактора категорий
-class CategoryEditorWindow(QWidget):
-    def __init__(self, category_combo):
-        super().__init__()
-        self.category_combo_wind = category_combo
-        self.initUI()
-
-    def initUI(self):
-        self.setWindowTitle('Редактирование категорий')
-        self.layout = QVBoxLayout(self)
-        self.layout.addWidget(self.category_combo_wind)

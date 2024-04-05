@@ -1,84 +1,42 @@
-"""
-Модуль содержит описание абстрактного репозитория
+import sqlite3
 
-Репозиторий реализует хранение объектов, присваивая каждому объекту уникальный
-идентификатор в атрибуте pk (primary key). Объекты, которые могут быть сохранены
-в репозитории, должны поддерживать добавление атрибута pk и не должны
-использовать его для иных целей.
-"""
+from Project_bookkeeper.bookkeeper.models.category import Category
+class AbstractRepository:
+    def __init__(self, db_path):
+        self.conn = sqlite3.connect(db_path)
+        self.cursor = self.conn.cursor()
+        self.create_table()
 
-from abc import ABC, abstractmethod
-from typing import Generic, TypeVar, Protocol, Any, List
+    def create_table(self):
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS categories (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                parent_id INTEGER,
+                FOREIGN KEY (parent_id) REFERENCES categories (id)
+            )
+        ''')
+        self.conn.commit()
 
+    def add(self, category):
+        self.cursor.execute('''
+            INSERT INTO categories (name, parent_id) VALUES (?, ?)
+        ''', (category.name, self.get_parent_id(category.parent)))
+        self.conn.commit()
 
-class Model(Protocol):  # pylint: disable=too-few-public-methods
-    """
-    Модель должна содержать атрибут pk
-    """
-    pk: int
+    def remove(self, category_name):
+        self.cursor.execute('''
+            DELETE FROM categories WHERE name = ?
+        ''', (category_name,))
+        self.conn.commit()
 
+    def get_all(self):
+        self.cursor.execute('SELECT name FROM categories')
+        return [Category(name) for name, in self.cursor.fetchall()]
 
-T = TypeVar('T', bound=Model)
-
-
-class AbstractRepository(ABC, Generic[T]):
-    """
-    Абстрактный репозиторий.
-    Абстрактные методы:
-    add
-    get
-    get_all
-    update
-    delete
-    """
-
-    def __init__(self):
-        self._data: List[T] = []
-
-    def add(self, obj: T) -> int:
-        """
-        Добавить объект в репозиторий, вернуть id объекта,
-        также записать id в атрибут pk.
-        """
-        # Предполагаем, что объекты имеют атрибут pk
-        if hasattr(obj, 'pk'):
-            obj.pk = len(self._data)  # Простой способ генерации id
-            self._data.append(obj)
-            return obj.pk
-        else:
-            raise AttributeError("Объект должен иметь атрибут 'pk'")
-
-    def get(self, pk: int) -> T | None:
-        """ Получить объект по id """
-        for obj in self._data:
-            #есть ли такой атрибут
-            if hasattr(obj, 'pk') and obj.pk == pk:
-                return obj
-        return None
-
-    def get_all(self, where: dict[str, Any] | None = None) -> list[T]:
-        """
-        Получить все записи по некоторому условию
-        where - условие в виде словаря {'название_поля': значение}
-        если условие не задано (по умолчанию), вернуть все записи
-        """
-        if where is None:
-            return self._data
-        else:
-            return [obj for obj in self._data if all(getattr(obj, field) == value for field, value in where.items())]
-
-    def update(self, obj: T) -> None:
-        """ Обновить данные об объекте. Объект должен содержать поле pk. """
-        if hasattr(obj, 'pk'):
-            for i, item in enumerate(self._data):
-                if hasattr(item, 'pk') and item.pk == obj.pk:
-                    self._data[i] = obj
-                    break
-        else:
-            raise AttributeError("Объект должен иметь атрибут 'pk'")
-
-    def delete(self, pk: int) -> None:
-        """ Удалить запись """
-        self._data = [obj for obj in self._data if not hasattr(obj, 'pk') or obj.pk != pk]
-
-
+    def get_parent_id(self, parent_name):
+        if parent_name is None:
+            return None
+        self.cursor.execute('SELECT id FROM categories WHERE name = ?', (parent_name,))
+        result = self.cursor.fetchone()
+        return result[0] if result else None
