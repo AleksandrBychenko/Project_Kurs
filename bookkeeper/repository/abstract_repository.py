@@ -80,3 +80,5 @@ class AbstractRepository(ABC, Generic[T]):
     def delete(self, pk: int) -> None:
         """ Удалить запись """
         self._data = [obj for obj in self._data if not hasattr(obj, 'pk') or obj.pk != pk]
+
+

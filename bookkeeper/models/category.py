@@ -1,9 +1,12 @@
 """
 Модель категории расходов
 """
+import sqlite3
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import Iterator
+
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QComboBox, QLineEdit, QPushButton, QMessageBox
 
 from ..repository.abstract_repository import AbstractRepository
 
@@ -116,3 +119,152 @@ class Category:
             repo.add(cat)
             created[child] = cat
         return list(created.values())
+
+class CategoryEditor(QWidget):
+    def __init__(self, repo):
+        super().__init__()
+        self.repo = repo
+        self.initUI()
+
+    def initUI(self):
+        self.layout = QVBoxLayout(self)
+
+        self.category_combo = QComboBox()
+        self.update_category_combo()
+
+        self.amount_edit = QLineEdit()
+
+        self.add_button = QPushButton("Добавить категорию")
+        self.add_button.clicked.connect(self.add_category)
+
+        self.remove_button = QPushButton("Удалить категорию")
+        self.remove_button.clicked.connect(self.remove_category)
+
+        self.layout.addWidget(self.category_combo)
+        self.layout.addWidget(self.amount_edit)
+        self.layout.addWidget(self.add_button)
+        self.layout.addWidget(self.remove_button)
+
+    def update_category_combo(self):
+        self.category_combo.clear()
+        all_categories = self.repo.get_all()
+        for category in all_categories:
+            self.category_combo.addItem(category.name)
+
+    def add_category(self):
+        # Здесь должна быть реализация добавления новой категории в репозиторий
+        # Например:
+        new_category_name = self.amount_edit.text()
+        new_category = Category(name=new_category_name)
+        self.repo.add(new_category)
+        self.update_category_combo()
+
+
+    def remove_category(self):
+        current_category = self.category_combo.currentText()
+        # Здесь должна быть реализация удаления категории из репозитория
+        #Например:
+        self.repo.remove(current_category)
+        self.update_category_combo()
+
+
+#--------------------------
+
+class Category2:
+    def __init__(self, name, parent=None):
+        self.name = name
+        self.parent = parent
+
+class AbstractRepository2:
+    def __init__(self, db_path):
+        self.conn = sqlite3.connect(db_path)
+        self.cursor = self.conn.cursor()
+        self.create_table()
+
+    def create_table(self):
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS categories (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                parent_id INTEGER,
+                FOREIGN KEY (parent_id) REFERENCES categories (id)
+            )
+        ''')
+        self.conn.commit()
+
+    def add(self, category):
+        self.cursor.execute('''
+            INSERT INTO categories (name, parent_id) VALUES (?, ?)
+        ''', (category.name, self.get_parent_id(category.parent)))
+        self.conn.commit()
+
+    def remove(self, category_name):
+        self.cursor.execute('''
+            DELETE FROM categories WHERE name = ?
+        ''', (category_name,))
+        self.conn.commit()
+
+    def get_all(self):
+        self.cursor.execute('SELECT name FROM categories')
+        return [Category(name) for name, in self.cursor.fetchall()]
+
+    def get_parent_id(self, parent_name):
+        if parent_name is None:
+            return None
+        self.cursor.execute('SELECT id FROM categories WHERE name = ?', (parent_name,))
+        result = self.cursor.fetchone()
+        return result[0] if result else None
+
+# Основной класс редактора категорий
+class CategoryEditor2(QWidget):
+    def __init__(self, repo):
+        super().__init__()
+        self.repo = repo
+        self.initUI()
+
+    def initUI(self):
+        self.layout = QVBoxLayout(self)
+
+        self.category_combo = QComboBox()
+        self.update_category_combo()
+
+        self.amount_edit = QLineEdit()
+
+        self.add_button = QPushButton("Добавить категорию")
+        self.add_button.clicked.connect(self.add_category)
+
+        self.remove_button = QPushButton("Удалить категорию")
+        self.remove_button.clicked.connect(self.remove_category)
+
+        self.layout.addWidget(self.category_combo)
+        self.layout.addWidget(self.amount_edit)
+        self.layout.addWidget(self.add_button)
+        self.layout.addWidget(self.remove_button)
+
+    def get_selected_category(self):
+        # Получаем текст выбранной категории
+        selected_category = self.category_combo.currentText()
+        return selected_category
+    def update_category_combo(self):
+        self.category_combo.clear()
+        all_categories = self.repo.get_all()
+        for category in all_categories:
+            self.category_combo.addItem(category.name)
+
+    def add_category(self):
+        new_category_name = self.amount_edit.text()
+        if not new_category_name:
+            QMessageBox.warning(self, "Ошибка", "Введите название категории.")
+            return
+        new_category = Category(new_category_name)
+        self.repo.add(new_category)
+        self.update_category_combo()
+        self.amount_edit.clear()
+
+    def remove_category(self):
+        current_category = self.category_combo.currentText()
+        if not current_category:
+            QMessageBox.warning(self, "Ошибка", "Выберите категорию для удаления.")
+            return
+        self.repo.remove(current_category)
+        self.update_category_combo()

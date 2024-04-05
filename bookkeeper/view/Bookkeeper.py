@@ -8,7 +8,7 @@ from Project_bookkeeper.bookkeeper.models.expense import ExpenseTableWidget
 from Project_bookkeeper.bookkeeper.repository.abstract_repository import AbstractRepository
 from Project_bookkeeper.bookkeeper.repository.sqlite_repository import SQLiteManager
 
-from Project_bookkeeper.bookkeeper.models.category import Category
+from Project_bookkeeper.bookkeeper.models.category import Category, CategoryEditor, CategoryEditor2, AbstractRepository2
 
 import sys
 from PySide6.QtWidgets import *
@@ -45,42 +45,22 @@ class Bookkeeeper(QWidget):
         self.label = QLabel("Настройки:")
         layout.addWidget(self.label)
 
-        # Добавляем котегории
-        repo = AbstractRepository[Category]()
-        # Создаем дерево категорий
-        tree = [
-            ('Тип расхода', None),
-            ('Прочее', None),
-            ('Ежемесячные траты', None),
-            ('Еда', None),
-            ('Напитки', None),
-            ('Еда -> Овощи', 'Еда'),
-            ('Еда -> Фрукты', 'Еда'),
-            ('Напитки -> Холодные напитки', 'Напитки'),
-            ('Напитки -> Горячие напитки', 'Напитки'),
-            ('Одежда', None),
-            ('Медицина', None),
-            ('Непредвиденные расходы', None),
+        repo = AbstractRepository2('DatabaseBookkeeper.db')  # Используйте путь к вашей базе данных
+        self.category_combo = CategoryEditor2(repo)
+        layout.addWidget(self.category_combo)
 
-        ]
+        #self.cat = self.category_combo.category_combo
+        #layout.addWidget(self.cat)
+        '''
+        edit_categories_button = QPushButton("Редактировать категории")
+        edit_categories_button.clicked.connect(self.open_category_editor)
+        layout.addWidget(edit_categories_button )
+        '''
 
-        # Создаем категории из дерева
-        categories = Category.create_from_tree(tree, repo)
-
-        category_combo = QComboBox()
-        # Получаем все категории из репозитория
-        all_categories = repo.get_all()
-        # Заполняем QComboBox названиями категорий
-        for category in all_categories:
-            category_combo.addItem(category.name)
-        #category_combo.addItems(['Категория 1', 'Категория 2', 'Категория 3'])  # Замените на свои категории
         amount_edit = QLineEdit()
-        layout.addWidget(category_combo)
         layout.addWidget(amount_edit)
-
-        #Добавление кнопок для настройки
         add_button = QPushButton('Добавить Расходы')
-        add_button.clicked.connect(lambda: self.add_expense_big(category_combo, amount_edit))
+        add_button.clicked.connect(lambda: self.add_expense_big(self.category_combo, amount_edit))
         layout.addWidget(add_button)
 
         # Создаем горизонтальный layout для кнопок
@@ -101,11 +81,15 @@ class Bookkeeeper(QWidget):
         self.expense_table.expense_changes()
         self.budget_table.buget_changes()
 
+    def open_category_editor(self):
+        self.category_editor_window = CategoryEditorWindow(self.category_combo)
+        self.category_editor_window.show()
+
     # Функция для кнопки Добавить щначение в базу данных
     def add_expense_big (self, category, amount):
         # Добавление новой записи в таблицу
 
-        self.sqlite_manager.execute_query(f"INSERT INTO expence (date, amount, category, comment) VALUES ('{datetime.now().date()}', '{amount.text()}', '{category.currentText()}', '')")
+        self.sqlite_manager.execute_query(f"INSERT INTO expence (date, amount, category, comment) VALUES ('{datetime.now().date()}', '{amount.text()}', '{category.get_selected_category()}', '')")
         # Обновление отображаемых данных в таблице
         # Связываем изменения в ячейках таблицы с обновлением данных в базе данных
 
@@ -132,3 +116,14 @@ class Bookkeeeper(QWidget):
         self.budget_table.buget_changes()
 
 
+# Основной класс редактора категорий
+class CategoryEditorWindow(QWidget):
+    def __init__(self, category_combo):
+        super().__init__()
+        self.category_combo_wind = category_combo
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle('Редактирование категорий')
+        self.layout = QVBoxLayout(self)
+        self.layout.addWidget(self.category_combo_wind)
