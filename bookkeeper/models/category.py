@@ -1,5 +1,5 @@
 """
-Модель категории расходов
+Модель категории расходов дял проекта
 """
 import sqlite3
 from collections import defaultdict
