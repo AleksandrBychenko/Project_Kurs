@@ -2,7 +2,7 @@ import pytest
 import sqlite3
 from Project_bookkeeper.bookkeeper.repository.sqlite_repository import SQLiteManager
 
-
+#test
 
 @pytest.fixture
 def database_name():
