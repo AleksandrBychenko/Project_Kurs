@@ -72,3 +72,15 @@ def test_with_file():
             ('child2', 'parent1'),
             ('parent2', None)
         ]
+
+if __name__ == '__main__':
+    pytest.main()
+
+import subprocess
+
+# Запуск всех тестов pytest
+result = subprocess.run(['pytest'], capture_output=True, text=True)
+
+# Вывод результата
+print(result.stdout)
+print(result.stderr)
