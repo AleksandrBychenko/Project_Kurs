@@ -19,9 +19,10 @@ class AbstractRepository:
         self.conn.commit()
 
     def add(self, category):
+
         self.cursor.execute('''
-            INSERT INTO categories (name, parent_id) VALUES (?, ?)
-        ''', (category.name, self.get_parent_id(category.parent)))
+            INSERT INTO categories (name) VALUES (?)
+        ''', (category.name,))
         self.conn.commit()
 
     def remove(self, category_name):
@@ -34,9 +35,3 @@ class AbstractRepository:
         self.cursor.execute('SELECT name FROM categories')
         return [Category(name) for name, in self.cursor.fetchall()]
 
-    def get_parent_id(self, parent_name):
-        if parent_name is None:
-            return None
-        self.cursor.execute('SELECT id FROM categories WHERE name = ?', (parent_name,))
-        result = self.cursor.fetchone()
-        return result[0] if result else None
